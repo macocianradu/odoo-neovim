@@ -33,11 +33,19 @@ additional_stubs = ["/home/user/.local/nvim/odoo/typeshed/stubs"]
 
 ### nvim
 
-There are two way of declaring new lsp
+The server need a bit of configuration to work smothly with neovim. Here is the minimal suggested config.
 
 ```lua
 -- Defined in <rtp>/lsp/odools.lua
 local server = '/home/user/.local/share/nvim/odoo/odoo_ls_server'
+-- Get the default client capabilities
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+
+-- Add your custom capability
+capabilities.general.markdown = {
+  parser = 'marked',
+  version = ''
+}
 return {
   cmd = {server, '--stdlib', vim.fn.fnamemodify(server, ':h') .. '/typeshed/stdlib'},
   root_dir = '/home/whe/.local/share/nvim/odoo',
@@ -46,29 +54,11 @@ return {
       uri = vim.uri_from_fname('/home/whe/src'),
       name = 'main_folder',
   }},
+  capabilities = capabilities,
   settings = {
       Odoo = {
           selectedProfile = 'main',
       }
   },
 }
-```
-
-```lua
--- Defined in init.lua
-local server = '/home/user/.local/share/nvim/odoo/odoo_ls_server'
-vim.lsp.config('clangd', {
-  cmd = {server, '--stdlib', vim.fn.fnamemodify(server, ':h') .. '/typeshed/stdlib'},
-  root_dir = '/home/whe/.local/share/nvim/odoo',
-  filetypes = { 'python' },
-  workspace_folders = {{
-      uri = vim.uri_from_fname('/home/user/src'),
-      name = 'main_folder',
-  }},
-  settings = {
-      Odoo = {
-          selectedProfile = 'main', -- should be the name defined in odools.toml
-      }
-  },
-})
 ```
