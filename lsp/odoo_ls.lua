@@ -1,4 +1,5 @@
 -- This file provides the default configuration for the 'odoo_ls' server.
+local util = require("lspconfig.util")
 
 local odoo_ls_locations = {
     vim.fn.expand('$HOME/.local/share/nvim/odoo/odoo_ls_server'),
@@ -14,17 +15,28 @@ for _, location in ipairs(odoo_ls_locations) do
 end
 
 return {
-    cmd = {
-        executable,
-    },
+    cmd = {executable},
     filetypes = { 'python', 'xml' },
-    workspace_folders = { {
-        uri = vim.uri_from_fname(vim.fn.getcwd()),
-        name = 'main_folder'
-    } },
     settings = {
         Odoo = {
             selectedProfile = 'main',
         }
     },
+    root_dir = util.root_pattern(".git"),
+
+    on_init = function(_, config)
+        local cmd = config.cmd
+
+        local cfg = config.config or {}
+
+        if cfg.config_path then
+            table.insert(cmd, "--config-path")
+            table.insert(cmd, cfg.config_path)
+        end
+
+        if cfg.stdlib then
+            table.insert(cmd, "--stdlib")
+            table.insert(cmd, cfg.stdlib)
+        end
+    end
 }
